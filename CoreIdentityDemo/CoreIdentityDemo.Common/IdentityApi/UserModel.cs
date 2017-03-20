@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace CoreIdentityDemo.Common.IdentityApi
 {
     public class UserModel
     {
+        [Required]
         public Guid Id { get; set; }
         public string UserName { get; set; }
         public string NormalizedUserName { get; set; }

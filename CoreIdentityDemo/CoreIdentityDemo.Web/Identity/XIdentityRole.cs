@@ -2,14 +2,14 @@
 
 namespace CoreIdentityDemo.Web.Identity
 {
-    public class IdentityRole
+    public class XIdentityRole
     {
-        public IdentityRole()
+        public XIdentityRole()
         {
             Id = Guid.NewGuid().ToString();
         }
 
-        public IdentityRole(string roleName)
+        public XIdentityRole(string roleName)
             : this()
         {
             Name = roleName;

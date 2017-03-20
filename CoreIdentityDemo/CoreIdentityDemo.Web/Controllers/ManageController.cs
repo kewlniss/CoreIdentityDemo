@@ -10,22 +10,23 @@ using Microsoft.Extensions.Options;
 using CoreIdentityDemo.Web.Models;
 using CoreIdentityDemo.Web.Models.ManageViewModels;
 using CoreIdentityDemo.Web.Services;
+using CoreIdentityDemo.Web.Identity;
 
 namespace CoreIdentityDemo.Web.Controllers
 {
     [Authorize]
     public class ManageController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<XIdentityUser> _userManager;
+        private readonly SignInManager<XIdentityUser> _signInManager;
         private readonly string _externalCookieScheme;
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
 
         public ManageController(
-          UserManager<ApplicationUser> userManager,
-          SignInManager<ApplicationUser> signInManager,
+          UserManager<XIdentityUser> userManager,
+          SignInManager<XIdentityUser> signInManager,
           IOptions<IdentityCookieOptions> identityCookieOptions,
           IEmailSender emailSender,
           ISmsSender smsSender,
@@ -363,7 +364,7 @@ namespace CoreIdentityDemo.Web.Controllers
             Error
         }
 
-        private Task<ApplicationUser> GetCurrentUserAsync()
+        private Task<XIdentityUser> GetCurrentUserAsync()
         {
             return _userManager.GetUserAsync(HttpContext.User);
         }

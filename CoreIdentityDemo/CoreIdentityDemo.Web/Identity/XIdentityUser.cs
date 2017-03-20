@@ -2,14 +2,14 @@
 
 namespace CoreIdentityDemo.Web.Identity
 {
-    public class IdentityUser
+    public class XIdentityUser
     {
-        public IdentityUser()
+        public XIdentityUser()
         {
             Id = Guid.NewGuid().ToString();
         }
 
-        public IdentityUser(string userName)
+        public XIdentityUser(string userName)
             : this()
         {
             UserName = userName;

@@ -11,19 +11,19 @@ using CoreIdentityDemo.Common.IdentityApi;
 
 namespace CoreIdentityDemo.Web.Identity
 {
-    public class RoleStore
-        : IRoleStore<IdentityRole>
-        , IRoleClaimStore<IdentityRole>
+    public class XRoleStore
+        : IRoleStore<XIdentityRole>
+        , IRoleClaimStore<XIdentityRole>
     {
         private readonly IIdentityApiClient _identityApiClient;
         private bool _disposed;
 
-        public RoleStore(IIdentityApiClient identityApiClient)
+        public XRoleStore(IIdentityApiClient identityApiClient)
         {
             _identityApiClient = identityApiClient;
         }
 
-        public async Task AddClaimAsync(IdentityRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task AddClaimAsync(XIdentityRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -34,7 +34,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.AddRoleClaimAsync(roleId, claim.Type, claim.Value);
         }
 
-        public async Task<IdentityResult> CreateAsync(IdentityRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> CreateAsync(XIdentityRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -46,7 +46,7 @@ namespace CoreIdentityDemo.Web.Identity
             return IdentityResult.Success;
         }
 
-        public async Task<IdentityResult> DeleteAsync(IdentityRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(XIdentityRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -65,7 +65,7 @@ namespace CoreIdentityDemo.Web.Identity
             _disposed = true;
         }
 
-        public async Task<IdentityRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
+        public async Task<XIdentityRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -75,7 +75,7 @@ namespace CoreIdentityDemo.Web.Identity
             return getIdentityRole(model);
         }
 
-        public async Task<IdentityRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        public async Task<XIdentityRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -84,7 +84,7 @@ namespace CoreIdentityDemo.Web.Identity
             return getIdentityRole(model);
         }
 
-        public async Task<IList<Claim>> GetClaimsAsync(IdentityRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IList<Claim>> GetClaimsAsync(XIdentityRole role, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -96,7 +96,7 @@ namespace CoreIdentityDemo.Web.Identity
                 .ToList();
         }
 
-        public Task<string> GetNormalizedRoleNameAsync(IdentityRole role, CancellationToken cancellationToken)
+        public Task<string> GetNormalizedRoleNameAsync(XIdentityRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -105,7 +105,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(role.NormalizedName);
         }
 
-        public Task<string> GetRoleIdAsync(IdentityRole role, CancellationToken cancellationToken)
+        public Task<string> GetRoleIdAsync(XIdentityRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -114,7 +114,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(role.Id);
         }
 
-        public Task<string> GetRoleNameAsync(IdentityRole role, CancellationToken cancellationToken)
+        public Task<string> GetRoleNameAsync(XIdentityRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -123,7 +123,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(role.Name);
         }
 
-        public async Task RemoveClaimAsync(IdentityRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveClaimAsync(XIdentityRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -134,7 +134,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.RemoveRoleClaimAsync(roleId, claim.Type, claim.Value);
         }
 
-        public Task SetNormalizedRoleNameAsync(IdentityRole role, string normalizedName, CancellationToken cancellationToken)
+        public Task SetNormalizedRoleNameAsync(XIdentityRole role, string normalizedName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -144,7 +144,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetRoleNameAsync(IdentityRole role, string roleName, CancellationToken cancellationToken)
+        public Task SetRoleNameAsync(XIdentityRole role, string roleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -154,7 +154,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public async Task<IdentityResult> UpdateAsync(IdentityRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(XIdentityRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -181,14 +181,14 @@ namespace CoreIdentityDemo.Web.Identity
             return result;
         }
 
-        private RoleModel getRoleModel(IdentityRole role)
+        private RoleModel getRoleModel(XIdentityRole role)
         {
             var model = new RoleModel();
             populateRoleModel(model, role);
             return model;
         }
 
-        private void populateRoleModel(RoleModel model, IdentityRole role)
+        private void populateRoleModel(RoleModel model, XIdentityRole role)
         {
             model.Id = getGuid(role.Id);
             model.Name = role.Name;
@@ -196,14 +196,14 @@ namespace CoreIdentityDemo.Web.Identity
             model.ConcurrencyStamp = role.ConcurrencyStamp;
         }
 
-        private IdentityRole getIdentityRole(RoleModel model)
+        private XIdentityRole getIdentityRole(RoleModel model)
         {
-            var role = new IdentityRole();
+            var role = new XIdentityRole();
             populateIdentityRole(role, model);
             return role;
         }
 
-        private void populateIdentityRole(IdentityRole role, RoleModel model)
+        private void populateIdentityRole(XIdentityRole role, RoleModel model)
         {
             role.Id = model.Id.ToString();
             role.Name = model.Name;
