@@ -96,26 +96,26 @@ namespace CoreIdentityDemo.Services.Migrations
                 "dbo.RoleClaims",
                 c => new
                     {
-                        ClaimId = c.Int(nullable: false),
+                        Id = c.Int(nullable: false),
                         RoleId = c.Guid(nullable: false),
                     })
-                .PrimaryKey(t => new { t.ClaimId, t.RoleId })
-                .ForeignKey("dbo.Claims", t => t.ClaimId, cascadeDelete: true)
+                .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.Claims", t => t.Id)
                 .ForeignKey("dbo.Roles", t => t.RoleId, cascadeDelete: true)
-                .Index(t => t.ClaimId)
+                .Index(t => t.Id)
                 .Index(t => t.RoleId);
             
             CreateTable(
                 "dbo.UserClaims",
                 c => new
                     {
-                        ClaimId = c.Int(nullable: false),
+                        Id = c.Int(nullable: false),
                         UserId = c.Guid(nullable: false),
                     })
-                .PrimaryKey(t => new { t.ClaimId, t.UserId })
-                .ForeignKey("dbo.Claims", t => t.ClaimId, cascadeDelete: true)
+                .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.Claims", t => t.Id)
                 .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
-                .Index(t => t.ClaimId)
+                .Index(t => t.Id)
                 .Index(t => t.UserId);
             
         }
@@ -123,17 +123,17 @@ namespace CoreIdentityDemo.Services.Migrations
         public override void Down()
         {
             DropForeignKey("dbo.UserClaims", "UserId", "dbo.Users");
-            DropForeignKey("dbo.UserClaims", "ClaimId", "dbo.Claims");
+            DropForeignKey("dbo.UserClaims", "Id", "dbo.Claims");
             DropForeignKey("dbo.RoleClaims", "RoleId", "dbo.Roles");
-            DropForeignKey("dbo.RoleClaims", "ClaimId", "dbo.Claims");
+            DropForeignKey("dbo.RoleClaims", "Id", "dbo.Claims");
             DropForeignKey("dbo.UserRoles", "UserId", "dbo.Users");
             DropForeignKey("dbo.UserRoles", "RoleId", "dbo.Roles");
             DropForeignKey("dbo.UserTokens", "UserId", "dbo.Users");
             DropForeignKey("dbo.UserLogins", "UserId", "dbo.Users");
             DropIndex("dbo.UserClaims", new[] { "UserId" });
-            DropIndex("dbo.UserClaims", new[] { "ClaimId" });
+            DropIndex("dbo.UserClaims", new[] { "Id" });
             DropIndex("dbo.RoleClaims", new[] { "RoleId" });
-            DropIndex("dbo.RoleClaims", new[] { "ClaimId" });
+            DropIndex("dbo.RoleClaims", new[] { "Id" });
             DropIndex("dbo.UserRoles", new[] { "UserId" });
             DropIndex("dbo.UserRoles", new[] { "RoleId" });
             DropIndex("dbo.UserTokens", new[] { "UserId" });

@@ -40,9 +40,10 @@ namespace CoreIdentityDemo.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IIdentityApiClient, IdentityApiClient>(provider => new IdentityApiClient(Configuration.GetValue<string>("AppSettings:IdentityApiBaseUrl")));
+            var qq = Configuration.GetValue<string>("AppSettings:IdentityApiBaseUrl");
+            services.AddScoped<IIdentityApiClient, IdentityApiClient>(provider => new IdentityApiClient(qq));
 
-            services.AddIdentity<XIdentityUser, XIdentityRole>()
+            services.AddIdentity<DemoIdentityUser, DemoIdentityRole>()
                 .AddCustomStores()
                 .AddDefaultTokenProviders();
 

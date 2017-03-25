@@ -7,8 +7,8 @@ namespace CoreIdentityDemo.Web.Identity
     {
         public static IdentityBuilder AddCustomStores(this IdentityBuilder builder)
         {
-            builder.Services.AddScoped<IUserStore<XIdentityUser>, XUserStore>();
-            builder.Services.AddScoped<IRoleStore<XIdentityRole>, XRoleStore>();
+            builder.Services.AddScoped<IUserStore<DemoIdentityUser>, DemoUserStore>();
+            builder.Services.AddScoped<IRoleStore<DemoIdentityRole>, DemoRoleStore>();
             return builder;
         }
     }

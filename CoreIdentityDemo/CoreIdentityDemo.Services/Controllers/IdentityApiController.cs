@@ -118,7 +118,7 @@ namespace CoreIdentityDemo.Services.Controllers
         }
 
         [PostRoute("user")]
-        public HttpResponseMessage CreateUser([FromBody]UserModel model)
+        public HttpResponseMessage CreateUser([FromBody] UserModel model)
         {
             if (ModelState.IsValid)
             {

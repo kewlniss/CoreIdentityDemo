@@ -13,7 +13,7 @@ namespace CoreIdentityDemo.Services.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201703192213151_Initial"; }
+            get { return "201703250452241_Initial"; }
         }
         
         string IMigrationMetadata.Source

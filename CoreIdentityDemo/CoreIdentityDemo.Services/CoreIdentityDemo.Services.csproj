@@ -111,9 +111,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201703192213151_Initial.cs" />
-    <Compile Include="Migrations\201703192213151_Initial.Designer.cs">
-      <DependentUpon>201703192213151_Initial.cs</DependentUpon>
+    <Compile Include="Migrations\201703250452241_Initial.cs" />
+    <Compile Include="Migrations\201703250452241_Initial.Designer.cs">
+      <DependentUpon>201703250452241_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -133,15 +133,15 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201703192213151_Initial.resx">
-      <DependentUpon>201703192213151_Initial.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\CoreIdentityDemo.Common\CoreIdentityDemo.Common.csproj">
       <Project>{504b73c8-ada7-41f4-9774-600d26806e60}</Project>
       <Name>CoreIdentityDemo.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201703250452241_Initial.resx">
+      <DependentUpon>201703250452241_Initial.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

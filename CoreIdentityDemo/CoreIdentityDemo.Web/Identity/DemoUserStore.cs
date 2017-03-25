@@ -11,28 +11,28 @@ using CoreIdentityDemo.Common.IdentityApi;
 
 namespace CoreIdentityDemo.Web.Identity
 {
-    public class XUserStore
-        : IUserLoginStore<XIdentityUser>
-        , IUserRoleStore<XIdentityUser>
-        , IUserClaimStore<XIdentityUser>
-        , IUserPasswordStore<XIdentityUser>
-        , IUserSecurityStampStore<XIdentityUser>
-        , IUserEmailStore<XIdentityUser>
-        , IUserLockoutStore<XIdentityUser>
-        , IUserPhoneNumberStore<XIdentityUser>
-        , IUserTwoFactorStore<XIdentityUser>
-        , IUserAuthenticationTokenStore<XIdentityUser>
-        , IUserStore<XIdentityUser>
+    public class DemoUserStore
+        : IUserLoginStore<DemoIdentityUser>
+        , IUserRoleStore<DemoIdentityUser>
+        , IUserClaimStore<DemoIdentityUser>
+        , IUserPasswordStore<DemoIdentityUser>
+        , IUserSecurityStampStore<DemoIdentityUser>
+        , IUserEmailStore<DemoIdentityUser>
+        , IUserLockoutStore<DemoIdentityUser>
+        , IUserPhoneNumberStore<DemoIdentityUser>
+        , IUserTwoFactorStore<DemoIdentityUser>
+        , IUserAuthenticationTokenStore<DemoIdentityUser>
+        , IUserStore<DemoIdentityUser>
     {
         private readonly IIdentityApiClient _identityApiClient;
         private bool _disposed;
 
-        public XUserStore(IIdentityApiClient identityApiClient)
+        public DemoUserStore(IIdentityApiClient identityApiClient)
         {
             _identityApiClient = identityApiClient;
         }
 
-        public async Task AddClaimsAsync(XIdentityUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task AddClaimsAsync(DemoIdentityUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -46,7 +46,7 @@ namespace CoreIdentityDemo.Web.Identity
             }
         }
 
-        public async Task AddLoginAsync(XIdentityUser user, UserLoginInfo login, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task AddLoginAsync(DemoIdentityUser user, UserLoginInfo login, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -57,7 +57,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.AddUserLoginAsync(userId, login.LoginProvider, login.ProviderKey, login.ProviderDisplayName);
         }
 
-        public async Task AddToRoleAsync(XIdentityUser user, string normalizedRoleName, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task AddToRoleAsync(DemoIdentityUser user, string normalizedRoleName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -68,7 +68,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.AddUserToRoleAsync(userId, normalizedRoleName);
         }
 
-        public async Task<IdentityResult> CreateAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IdentityResult> CreateAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -80,7 +80,7 @@ namespace CoreIdentityDemo.Web.Identity
             return IdentityResult.Success;
         }
 
-        public async Task<IdentityResult> DeleteAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IdentityResult> DeleteAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -99,7 +99,7 @@ namespace CoreIdentityDemo.Web.Identity
             _disposed = true;
         }
 
-        public async Task<XIdentityUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<DemoIdentityUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -108,7 +108,7 @@ namespace CoreIdentityDemo.Web.Identity
             return getIdentityUser(model);
         }
 
-        public async Task<XIdentityUser> FindByIdAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<DemoIdentityUser> FindByIdAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -118,7 +118,7 @@ namespace CoreIdentityDemo.Web.Identity
             return getIdentityUser(model);
         }
 
-        public async Task<XIdentityUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<DemoIdentityUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -127,7 +127,7 @@ namespace CoreIdentityDemo.Web.Identity
             return getIdentityUser(model);
         }
 
-        public async Task<XIdentityUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<DemoIdentityUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -136,7 +136,7 @@ namespace CoreIdentityDemo.Web.Identity
             return getIdentityUser(model);
         }
 
-        public Task<int> GetAccessFailedCountAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<int> GetAccessFailedCountAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -145,7 +145,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.AccessFailedCount);
         }
 
-        public async Task<IList<Claim>> GetClaimsAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IList<Claim>> GetClaimsAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -156,7 +156,7 @@ namespace CoreIdentityDemo.Web.Identity
                 .Select(x => new Claim(x.Type, x.Value)).ToList();
         }
 
-        public Task<string> GetEmailAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetEmailAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -165,7 +165,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.Email);
         }
 
-        public Task<bool> GetEmailConfirmedAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> GetEmailConfirmedAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -174,7 +174,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.EmailConfirmed);
         }
 
-        public Task<bool> GetLockoutEnabledAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> GetLockoutEnabledAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -183,7 +183,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.LockoutEnabled);
         }
 
-        public Task<DateTimeOffset?> GetLockoutEndDateAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<DateTimeOffset?> GetLockoutEndDateAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -192,7 +192,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.LockoutEndDate);
         }
 
-        public async Task<IList<UserLoginInfo>> GetLoginsAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IList<UserLoginInfo>> GetLoginsAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -203,7 +203,7 @@ namespace CoreIdentityDemo.Web.Identity
                 .Select(x => new UserLoginInfo(x.LoginProvider, x.ProviderKey, x.ProviderDisplayName)).ToList();
         }
 
-        public Task<string> GetNormalizedEmailAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetNormalizedEmailAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -212,7 +212,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.NormalizedEmail);
         }
 
-        public Task<string> GetNormalizedUserNameAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetNormalizedUserNameAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -221,7 +221,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.NormalizedUserName);
         }
 
-        public Task<string> GetPasswordHashAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetPasswordHashAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -230,7 +230,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.PasswordHash);
         }
 
-        public Task<string> GetPhoneNumberAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetPhoneNumberAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -239,7 +239,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.PhoneNumber);
         }
 
-        public Task<bool> GetPhoneNumberConfirmedAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> GetPhoneNumberConfirmedAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -248,7 +248,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.PhoneNumberConfirmed);
         }
 
-        public async Task<IList<string>> GetRolesAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IList<string>> GetRolesAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -258,7 +258,7 @@ namespace CoreIdentityDemo.Web.Identity
             return await _identityApiClient.GetUserRolesAsync(userId);
         }
 
-        public Task<string> GetSecurityStampAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetSecurityStampAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -267,7 +267,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.SecurityStamp);
         }
 
-        public async Task<string> GetTokenAsync(XIdentityUser user, string loginProvider, string name, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<string> GetTokenAsync(DemoIdentityUser user, string loginProvider, string name, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -280,7 +280,7 @@ namespace CoreIdentityDemo.Web.Identity
                 .FirstOrDefault();
         }
 
-        public Task<bool> GetTwoFactorEnabledAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> GetTwoFactorEnabledAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -289,7 +289,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.TwoFactorEnabled);
         }
 
-        public Task<string> GetUserIdAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetUserIdAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -298,7 +298,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.Id);
         }
 
-        public Task<string> GetUserNameAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<string> GetUserNameAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -307,17 +307,17 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.UserName);
         }
 
-        public Task<IList<XIdentityUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IList<DemoIdentityUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             throw new NotImplementedException();
         }
 
-        public Task<IList<XIdentityUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IList<DemoIdentityUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> HasPasswordAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> HasPasswordAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -326,7 +326,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(!string.IsNullOrWhiteSpace(user.PasswordHash));
         }
 
-        public Task<int> IncrementAccessFailedCountAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<int> IncrementAccessFailedCountAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -336,7 +336,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.AccessFailedCount);
         }
 
-        public async Task<bool> IsInRoleAsync(XIdentityUser user, string normalizedRoleName, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<bool> IsInRoleAsync(DemoIdentityUser user, string normalizedRoleName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -347,7 +347,7 @@ namespace CoreIdentityDemo.Web.Identity
             return await _identityApiClient.IsUserInRole(userId, normalizedRoleName);
         }
 
-        public async Task RemoveClaimsAsync(XIdentityUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveClaimsAsync(DemoIdentityUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -361,7 +361,7 @@ namespace CoreIdentityDemo.Web.Identity
             }
         }
 
-        public async Task RemoveFromRoleAsync(XIdentityUser user, string normalizedRoleName, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveFromRoleAsync(DemoIdentityUser user, string normalizedRoleName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -372,7 +372,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.RemoveUserFromRoleAsync(userId, normalizedRoleName);
         }
 
-        public async Task RemoveLoginAsync(XIdentityUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveLoginAsync(DemoIdentityUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -382,7 +382,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.RemoveUserLoginAsync(userId, loginProvider, providerKey);
         }
 
-        public async Task RemoveTokenAsync(XIdentityUser user, string loginProvider, string name, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveTokenAsync(DemoIdentityUser user, string loginProvider, string name, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -392,7 +392,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.RemoveUserTokenAsync(userId, loginProvider, name);
         }
 
-        public async Task ReplaceClaimAsync(XIdentityUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ReplaceClaimAsync(DemoIdentityUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -406,7 +406,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.ReplaceUserClaimAsync(userId, claimModel, newClaimModel);
         }
 
-        public Task ResetAccessFailedCountAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public Task ResetAccessFailedCountAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -415,7 +415,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetEmailAsync(XIdentityUser user, string email, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetEmailAsync(DemoIdentityUser user, string email, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -424,7 +424,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetEmailConfirmedAsync(XIdentityUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetEmailConfirmedAsync(DemoIdentityUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -433,7 +433,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetLockoutEnabledAsync(XIdentityUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetLockoutEnabledAsync(DemoIdentityUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -442,7 +442,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetLockoutEndDateAsync(XIdentityUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetLockoutEndDateAsync(DemoIdentityUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -451,7 +451,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetNormalizedEmailAsync(XIdentityUser user, string normalizedEmail, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetNormalizedEmailAsync(DemoIdentityUser user, string normalizedEmail, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -460,7 +460,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetNormalizedUserNameAsync(XIdentityUser user, string normalizedName, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetNormalizedUserNameAsync(DemoIdentityUser user, string normalizedName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -469,7 +469,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetPasswordHashAsync(XIdentityUser user, string passwordHash, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetPasswordHashAsync(DemoIdentityUser user, string passwordHash, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -478,7 +478,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetPhoneNumberAsync(XIdentityUser user, string phoneNumber, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetPhoneNumberAsync(DemoIdentityUser user, string phoneNumber, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -487,7 +487,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetPhoneNumberConfirmedAsync(XIdentityUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetPhoneNumberConfirmedAsync(DemoIdentityUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -496,7 +496,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetSecurityStampAsync(XIdentityUser user, string stamp, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetSecurityStampAsync(DemoIdentityUser user, string stamp, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -506,7 +506,7 @@ namespace CoreIdentityDemo.Web.Identity
 
         }
 
-        public async Task SetTokenAsync(XIdentityUser user, string loginProvider, string name, string value, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task SetTokenAsync(DemoIdentityUser user, string loginProvider, string name, string value, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -516,7 +516,7 @@ namespace CoreIdentityDemo.Web.Identity
             await _identityApiClient.SetUserTokenAsync(userId, loginProvider, name, value);
         }
 
-        public Task SetTwoFactorEnabledAsync(XIdentityUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetTwoFactorEnabledAsync(DemoIdentityUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -525,7 +525,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public Task SetUserNameAsync(XIdentityUser user, string userName, CancellationToken cancellationToken = default(CancellationToken))
+        public Task SetUserNameAsync(DemoIdentityUser user, string userName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -534,7 +534,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.CompletedTask;
         }
 
-        public async Task<IdentityResult> UpdateAsync(XIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IdentityResult> UpdateAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -560,7 +560,7 @@ namespace CoreIdentityDemo.Web.Identity
             return result;
         }
 
-        private UserModel getUserModel(XIdentityUser user)
+        private UserModel getUserModel(DemoIdentityUser user)
         {
             if (user == null)
                 return null;
@@ -570,7 +570,7 @@ namespace CoreIdentityDemo.Web.Identity
             return model;
         }
 
-        private void populateUserModel(UserModel model, XIdentityUser user)
+        private void populateUserModel(UserModel model, DemoIdentityUser user)
         {
             ExceptionUtil.ThrowIfNull(model, nameof(model));
             ExceptionUtil.ThrowIfNull(user, nameof(user));
@@ -592,17 +592,17 @@ namespace CoreIdentityDemo.Web.Identity
             model.AccessFailedCount = user.AccessFailedCount;
         }
 
-        private XIdentityUser getIdentityUser(UserModel model)
+        private DemoIdentityUser getIdentityUser(UserModel model)
         {
             if (model == null)
                 return null;
 
-            var user = new XIdentityUser();
+            var user = new DemoIdentityUser();
             populateIdentityUser(user, model);
             return user;
         }
 
-        private void populateIdentityUser(XIdentityUser user, UserModel model)
+        private void populateIdentityUser(DemoIdentityUser user, UserModel model)
         {
             ExceptionUtil.ThrowIfNull(user, nameof(user));
             ExceptionUtil.ThrowIfNull(model, nameof(model));
