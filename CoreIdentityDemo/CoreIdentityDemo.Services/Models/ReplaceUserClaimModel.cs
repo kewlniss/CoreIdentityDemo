@@ -1,9 +1,9 @@
 ﻿using System.Runtime.Serialization;
 
-namespace CoreIdentityDemo.Common.IdentityApi
+namespace CoreIdentityDemo.Services.Models
 {
     [DataContract]
-    public class ReplaceUserClaimArgs
+    public class ReplaceUserClaimModel
     {
         [DataMember(IsRequired = true)]
         public string claimType { get; set; }

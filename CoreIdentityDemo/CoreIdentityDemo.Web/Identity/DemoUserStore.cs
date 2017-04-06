@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CoreIdentityDemo.Domain.Entities;
+using CoreIdentityDemo.Domain.Keys;
+using CoreIdentityDemo.Domain.UnitOfWork;
+using CoreIdentityDemo.Web.Util;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Security.Claims;
-using CoreIdentityDemo.ApiClients;
-using CoreIdentityDemo.Common.Util;
-using CoreIdentityDemo.Common.IdentityApi;
+using System.Threading.Tasks;
 
 namespace CoreIdentityDemo.Web.Identity
 {
@@ -24,15 +24,15 @@ namespace CoreIdentityDemo.Web.Identity
         , IUserAuthenticationTokenStore<DemoIdentityUser>
         , IUserStore<DemoIdentityUser>
     {
-        private readonly IIdentityApiClient _identityApiClient;
+        private readonly IUnitOfWork _unitOfWork;
         private bool _disposed;
 
-        public DemoUserStore(IIdentityApiClient identityApiClient)
+        public DemoUserStore(IUnitOfWork unitOfWork)
         {
-            _identityApiClient = identityApiClient;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task AddClaimsAsync(DemoIdentityUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task AddClaimsAsync(DemoIdentityUser user, IEnumerable<System.Security.Claims.Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -42,8 +42,16 @@ namespace CoreIdentityDemo.Web.Identity
             var userId = getGuid(user.Id);
             foreach(var claim in claims)
             {
-                await _identityApiClient.AddUserClaimAsync(userId, claim.Type, claim.Value);
+                var userClaim = new UserClaim
+                {
+                    UserId = userId,
+                    Type = claim.Type,
+                    Value = claim.Value
+                };
+                await _unitOfWork.UserClaimRepository.AddAsync(userClaim);
             }
+
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task AddLoginAsync(DemoIdentityUser user, UserLoginInfo login, CancellationToken cancellationToken = default(CancellationToken))
@@ -53,8 +61,16 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(user, nameof(user));
             ExceptionUtil.ThrowIfNull(login, nameof(login));
 
-            var userId = getGuid(user.Id);
-            await _identityApiClient.AddUserLoginAsync(userId, login.LoginProvider, login.ProviderKey, login.ProviderDisplayName);
+            var userLogin = new UserLogin
+            {
+                LoginProvider = login.LoginProvider,
+                ProviderDisplayName = login.ProviderDisplayName,
+                ProviderKey = login.ProviderKey,
+                UserId = getGuid(user.Id)
+            };
+
+            await _unitOfWork.UserLoginRepository.AddAsync(userLogin);
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task AddToRoleAsync(DemoIdentityUser user, string normalizedRoleName, CancellationToken cancellationToken = default(CancellationToken))
@@ -65,7 +81,9 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNullOrWhiteSpace(normalizedRoleName, nameof(normalizedRoleName));
 
             var userId = getGuid(user.Id);
-            await _identityApiClient.AddUserToRoleAsync(userId, normalizedRoleName);
+
+            await _unitOfWork.UserRepository.AdduserToRoleAsync(userId, normalizedRoleName);
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task<IdentityResult> CreateAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -74,9 +92,11 @@ namespace CoreIdentityDemo.Web.Identity
             throwIfDisposed();
             ExceptionUtil.ThrowIfNull(user, nameof(user));
 
-            var model = getUserModel(user);
-            await _identityApiClient.CreateUserAsync(model);
-           
+            var u = getUser(user);
+
+            await _unitOfWork.UserRepository.AddAsync(u);
+            await _unitOfWork.CommitAsync();
+            
             return IdentityResult.Success;
         }
 
@@ -86,16 +106,18 @@ namespace CoreIdentityDemo.Web.Identity
             throwIfDisposed();
             ExceptionUtil.ThrowIfNull(user, nameof(user));
 
-            var userId = getGuid(user.Id);
-            await _identityApiClient.DeleteUserAsync(userId);
+            var u = getUser(user);
+
+            await _unitOfWork.UserRepository.DeleteAsync(u);
+            await _unitOfWork.CommitAsync();
 
             return IdentityResult.Success;
         }
 
         public void Dispose()
         {
-            if(_identityApiClient != null)
-                _identityApiClient.Dispose();
+            if(_unitOfWork != null)
+                _unitOfWork.Dispose();
             _disposed = true;
         }
 
@@ -104,8 +126,10 @@ namespace CoreIdentityDemo.Web.Identity
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
 
-            var model = await _identityApiClient.FindUserByEmailAsync(normalizedEmail);
-            return getIdentityUser(model);
+            var user = await _unitOfWork.UserRepository.GetByNormalizedEmailAsync(normalizedEmail);
+            var result = getIdentityUser(user);
+
+            return result;
         }
 
         public async Task<DemoIdentityUser> FindByIdAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
@@ -114,8 +138,10 @@ namespace CoreIdentityDemo.Web.Identity
             throwIfDisposed();
 
             var userGuid = getGuid(userId);
-            var model = await _identityApiClient.FindUserByIdAsync(userGuid);
-            return getIdentityUser(model);
+            var user = await _unitOfWork.UserRepository.GetByKeyAsync(userGuid);
+            var result = getIdentityUser(user);
+
+            return result;
         }
 
         public async Task<DemoIdentityUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
@@ -123,8 +149,16 @@ namespace CoreIdentityDemo.Web.Identity
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
 
-            var model = await _identityApiClient.FindUserByLoginAsync(loginProvider, providerKey);
-            return getIdentityUser(model);
+            var loginKey = new UserLoginKey
+            {
+                LoginProvider = loginProvider,
+                ProviderKey = providerKey
+            };
+
+            var user = await _unitOfWork.UserRepository.GetByUserLoginAsync(loginKey);
+            var result = getIdentityUser(user);
+
+            return result;
         }
 
         public async Task<DemoIdentityUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
@@ -132,8 +166,10 @@ namespace CoreIdentityDemo.Web.Identity
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
 
-            var model = await _identityApiClient.FindUserByNameAsync(normalizedUserName);
-            return getIdentityUser(model);
+            var user = await _unitOfWork.UserRepository.GetByNormalizedUsernameAsync(normalizedUserName);
+            var result = getIdentityUser(user);
+
+            return result;
         }
 
         public Task<int> GetAccessFailedCountAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -145,15 +181,18 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.AccessFailedCount);
         }
 
-        public async Task<IList<Claim>> GetClaimsAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IList<System.Security.Claims.Claim>> GetClaimsAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
             ExceptionUtil.ThrowIfNull(user, nameof(user));
 
             var userId = getGuid(user.Id);
-            return (await _identityApiClient.GetUserClaimsAsync(userId))
-                .Select(x => new Claim(x.Type, x.Value)).ToList();
+            var result = (await _unitOfWork.UserClaimRepository.GetByUserIdAsync(userId))
+                .Select(x => new System.Security.Claims.Claim( x.Type, x.Value))
+                .ToList();
+
+            return result;
         }
 
         public Task<string> GetEmailAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -199,8 +238,11 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(user, nameof(user));
 
             var userId = getGuid(user.Id);
-            return (await _identityApiClient.GetUserLoginsAsync(userId))
-                .Select(x => new UserLoginInfo(x.LoginProvider, x.ProviderKey, x.ProviderDisplayName)).ToList();
+            var result = (await _unitOfWork.UserLoginRepository.GetByUserIdAsync(userId))
+                .Select(x => new UserLoginInfo(x.LoginProvider, x.ProviderKey, x.ProviderDisplayName))
+                .ToList();
+
+            return result;
         }
 
         public Task<string> GetNormalizedEmailAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -255,7 +297,11 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(user, nameof(user));
 
             var userId = getGuid(user.Id);
-            return await _identityApiClient.GetUserRolesAsync(userId);
+            var result = (await _unitOfWork.RoleRepository.GetByUserIdAsync(userId))
+                .Select(x => x.Name)
+                .ToList();
+
+            return result;
         }
 
         public Task<string> GetSecurityStampAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -274,10 +320,10 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(user, nameof(user));
 
             var userId = getGuid(user.Id);
-            return (await _identityApiClient.GetUserTokensAsync(userId))
-                .Where(x => x.LoginProvider == loginProvider && x.Name == name)
-                .Select(x => x.Value)
-                .FirstOrDefault();
+            var token = await _unitOfWork.UserTokenRepository.GetByKeyAsync(null);
+            var result = token?.Value;
+
+            return result;
         }
 
         public Task<bool> GetTwoFactorEnabledAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -307,9 +353,16 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(user.UserName);
         }
 
-        public Task<IList<DemoIdentityUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IList<DemoIdentityUser>> GetUsersForClaimAsync(System.Security.Claims.Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            throwIfDisposed();
+
+            var result = (await _unitOfWork.UserRepository.GetByClaimAsync(claim.Type, claim.Value))
+                .Select(x => getIdentityUser(x))
+                .ToList();
+
+            return result;
         }
 
         public Task<IList<DemoIdentityUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
@@ -344,10 +397,12 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNullOrWhiteSpace(normalizedRoleName, nameof(normalizedRoleName));
             var userId = getGuid(user.Id);
 
-            return await _identityApiClient.IsUserInRole(userId, normalizedRoleName);
+            return (await _unitOfWork.RoleRepository.GetByUserIdAsync(userId))
+                .Select(x => x.NormalizedName)
+                .Any(x => x == normalizedRoleName);
         }
 
-        public async Task RemoveClaimsAsync(DemoIdentityUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveClaimsAsync(DemoIdentityUser user, IEnumerable<System.Security.Claims.Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -357,8 +412,16 @@ namespace CoreIdentityDemo.Web.Identity
             var userId = getGuid(user.Id);
             foreach(var claim in claims)
             {
-                await _identityApiClient.RemoveUserClaimAsync(userId, claim.Type, claim.Value);
+                var c = (await _unitOfWork.UserClaimRepository.GetByUserIdAsync(userId))
+                    .FirstOrDefault(x => x.Type == claim.Type && x.Value == claim.Value);
+
+                if (c != null)
+                {
+                    await _unitOfWork.UserClaimRepository.DeleteAsync(c);
+                }
             }
+
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task RemoveFromRoleAsync(DemoIdentityUser user, string normalizedRoleName, CancellationToken cancellationToken = default(CancellationToken))
@@ -369,7 +432,8 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNullOrWhiteSpace(normalizedRoleName, nameof(normalizedRoleName));
             var userId = getGuid(user.Id);
 
-            await _identityApiClient.RemoveUserFromRoleAsync(userId, normalizedRoleName);
+            await _unitOfWork.UserRepository.RemoveuserFromRoleAsync(userId, normalizedRoleName);
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task RemoveLoginAsync(DemoIdentityUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
@@ -379,7 +443,14 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(user, nameof(user));
             var userId = getGuid(user.Id);
 
-            await _identityApiClient.RemoveUserLoginAsync(userId, loginProvider, providerKey);
+            var userLoginKey = new UserLoginKey { LoginProvider = loginProvider, ProviderKey = providerKey };
+            var userLogin = await _unitOfWork.UserLoginRepository.GetByKeyAsync(userLoginKey);
+
+            if (userLogin != null && userLogin.UserId == userId)
+            {
+                await _unitOfWork.UserLoginRepository.DeleteAsync(userLogin);
+                await _unitOfWork.CommitAsync();
+            }
         }
 
         public async Task RemoveTokenAsync(DemoIdentityUser user, string loginProvider, string name, CancellationToken cancellationToken = default(CancellationToken))
@@ -389,21 +460,37 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(user, nameof(user));
             var userId = getGuid(user.Id);
 
-            await _identityApiClient.RemoveUserTokenAsync(userId, loginProvider, name);
+            var tokenKey = new UserTokenKey { LoginProvider = loginProvider, Name = name, UserId = userId };
+            var token = await _unitOfWork.UserTokenRepository.GetByKeyAsync(tokenKey);
+
+            if(token != null)
+            {
+                await _unitOfWork.UserTokenRepository.DeleteAsync(token);
+                await _unitOfWork.CommitAsync();
+            }
         }
 
-        public async Task ReplaceClaimAsync(DemoIdentityUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ReplaceClaimAsync(DemoIdentityUser user, System.Security.Claims.Claim claim, System.Security.Claims.Claim newClaim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
             ExceptionUtil.ThrowIfNull(user, nameof(user));
             ExceptionUtil.ThrowIfNull(claim, nameof(claim));
             ExceptionUtil.ThrowIfNull(newClaim, nameof(newClaim));
-            var userId = getGuid(user.Id);
-            var claimModel = new ClaimModel { Type = claim.Type, Value = claim.Value };
-            var newClaimModel = new ClaimModel { Type = newClaim.Type, Value = newClaim.Value };
 
-            await _identityApiClient.ReplaceUserClaimAsync(userId, claimModel, newClaimModel);
+            var userId = getGuid(user.Id);
+
+            var userClaim = (await _unitOfWork.UserClaimRepository.GetByUserIdAsync(userId))
+                .SingleOrDefault(x => x.Type == claim.Type && x.Value == claim.Value);
+
+            if(userClaim != null)
+            {
+                userClaim.Type = newClaim.Type;
+                userClaim.Value = newClaim.Value;
+
+                await _unitOfWork.UserClaimRepository.UpdateAsync(userClaim);
+                await _unitOfWork.CommitAsync();
+            }
         }
 
         public Task ResetAccessFailedCountAsync(DemoIdentityUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -511,9 +598,29 @@ namespace CoreIdentityDemo.Web.Identity
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
             ExceptionUtil.ThrowIfNull(user, nameof(user));
-            var userId = getGuid(user.Id);
 
-            await _identityApiClient.SetUserTokenAsync(userId, loginProvider, name, value);
+            var userId = getGuid(user.Id);
+            var userTokenKey = new UserTokenKey { LoginProvider = loginProvider, Name = name, UserId = userId };
+            var userToken = await _unitOfWork.UserTokenRepository.GetByKeyAsync(userTokenKey);
+
+            if(userToken == null)
+            {
+                userToken = new UserToken
+                {
+                    LoginProvider = loginProvider,
+                    Name = name,
+                    UserId = userId,
+                    Value = value
+                };
+                await _unitOfWork.UserTokenRepository.AddAsync(userToken);
+            }
+            else
+            {
+                userToken.Value = value;
+                await _unitOfWork.UserTokenRepository.UpdateAsync(userToken);
+            }
+
+            await _unitOfWork.CommitAsync();
         }
 
         public Task SetTwoFactorEnabledAsync(DemoIdentityUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
@@ -540,8 +647,10 @@ namespace CoreIdentityDemo.Web.Identity
             throwIfDisposed();
             ExceptionUtil.ThrowIfNull(user, nameof(user));
 
-            var model = getUserModel(user);
-            await _identityApiClient.UpdateUserAsync(model);
+            var userEntity = getUser(user);
+
+            await _unitOfWork.UserRepository.UpdateAsync(userEntity);
+            await _unitOfWork.CommitAsync();
 
             return IdentityResult.Success;
         }
@@ -560,68 +669,62 @@ namespace CoreIdentityDemo.Web.Identity
             return result;
         }
 
-        private UserModel getUserModel(DemoIdentityUser user)
+        private User getUser(DemoIdentityUser user)
         {
-            if (user == null)
-                return null;
-
-            var model = new UserModel();
-            populateUserModel(model, user);
-            return model;
+            var result = default(User);
+            populateUser(result, user);
+            return result;
         }
 
-        private void populateUserModel(UserModel model, DemoIdentityUser user)
+        private void populateUser(User entity, DemoIdentityUser user)
         {
-            ExceptionUtil.ThrowIfNull(model, nameof(model));
-            ExceptionUtil.ThrowIfNull(user, nameof(user));
-
-            model.Id = getGuid(user.Id);
-            model.UserName = user.UserName;
-            model.NormalizedUserName = user.NormalizedUserName;
-            model.Email = user.Email;
-            model.NormalizedEmail = user.NormalizedEmail;
-            model.EmailConfirmed = user.EmailConfirmed;
-            model.PasswordHash = user.PasswordHash;
-            model.SecurityStamp = user.SecurityStamp;
-            model.ConcurrencyStamp = user.ConcurrencyStamp;
-            model.PhoneNumber = user.PhoneNumber;
-            model.PhoneNumberConfirmed = user.PhoneNumberConfirmed;
-            model.TwoFactorEnabled = user.TwoFactorEnabled;
-            model.LockoutEnd = user.LockoutEndDate;
-            model.LockoutEnabled = user.LockoutEnabled;
-            model.AccessFailedCount = user.AccessFailedCount;
+            entity.AccessFailedCount = user.AccessFailedCount;
+            entity.ConcurrencyStamp = user.ConcurrencyStamp;
+            entity.Email = user.Email;
+            entity.EmailConfirmed = user.EmailConfirmed;
+            entity.Id = getGuid(user.Id);
+            entity.LockoutEnabled = user.LockoutEnabled;
+            entity.LockoutEnd = user.LockoutEndDate;
+            entity.NormalizedEmail = user.NormalizedEmail;
+            entity.NormalizedUserName = user.NormalizedUserName;
+            entity.PasswordHash = user.PasswordHash;
+            entity.PhoneNumber = user.PhoneNumber;
+            entity.PhoneNumberConfirmed = user.PhoneNumberConfirmed;
+            entity.SecurityStamp = user.SecurityStamp;
+            entity.TwoFactorEnabled = user.TwoFactorEnabled;
+            entity.UserName = user.UserName;
         }
 
-        private DemoIdentityUser getIdentityUser(UserModel model)
+        private DemoIdentityUser getIdentityUser(User entity)
         {
-            if (model == null)
+            if (entity == null)
                 return null;
 
             var user = new DemoIdentityUser();
-            populateIdentityUser(user, model);
+            populateIdentityUser(user, entity);
             return user;
         }
 
-        private void populateIdentityUser(DemoIdentityUser user, UserModel model)
+        private void populateIdentityUser(DemoIdentityUser user, User entity)
         {
             ExceptionUtil.ThrowIfNull(user, nameof(user));
-            ExceptionUtil.ThrowIfNull(model, nameof(model));
+            ExceptionUtil.ThrowIfNull(entity, nameof(entity));
 
-            user.Id = model.Id.ToString();
-            user.UserName = model.UserName;
-            user.NormalizedUserName = model.NormalizedUserName;
-            user.Email = model.Email;
-            user.NormalizedEmail = model.NormalizedEmail;
-            user.EmailConfirmed = model.EmailConfirmed;
-            user.PasswordHash = model.PasswordHash;
-            user.SecurityStamp = model.SecurityStamp;
-            user.ConcurrencyStamp = model.ConcurrencyStamp;
-            user.PhoneNumber = model.PhoneNumber;
-            user.PhoneNumberConfirmed = model.PhoneNumberConfirmed;
-            user.TwoFactorEnabled = model.TwoFactorEnabled;
-            user.LockoutEndDate = model.LockoutEnd;
-            user.LockoutEnabled = model.LockoutEnabled;
-            user.AccessFailedCount = model.AccessFailedCount;
+            user.Id = entity.Id.ToString();
+            user.UserName = entity.UserName;
+            user.NormalizedUserName = entity.NormalizedUserName;
+            user.Email = entity.Email;
+            user.NormalizedEmail = entity.NormalizedEmail;
+            user.EmailConfirmed = entity.EmailConfirmed;
+            user.PasswordHash = entity.PasswordHash;
+            user.SecurityStamp = entity.SecurityStamp;
+            user.ConcurrencyStamp = entity.ConcurrencyStamp;
+            user.PhoneNumber = entity.PhoneNumber;
+            user.PhoneNumberConfirmed = entity.PhoneNumberConfirmed;
+            user.TwoFactorEnabled = entity.TwoFactorEnabled;
+            user.LockoutEndDate = entity.LockoutEnd;
+            user.LockoutEnabled = entity.LockoutEnabled;
+            user.AccessFailedCount = entity.AccessFailedCount;
         }
     }
 }

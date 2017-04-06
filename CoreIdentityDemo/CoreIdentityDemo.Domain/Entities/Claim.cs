@@ -1,4 +1,4 @@
-﻿namespace CoreIdentityDemo.Services.Data.Entities
+﻿namespace CoreIdentityDemo.Domain.Entities
 {
     public abstract class Claim
     {

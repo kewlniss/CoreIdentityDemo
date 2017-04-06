@@ -29,7 +29,8 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CoreIdentityDemo.ApiClients\CoreIdentityDemo.ApiClients.csproj" />
+    <ProjectReference Include="..\CoreIdentityDemo.Data.DapperSql\CoreIdentityDemo.Data.DapperSql.csproj" />
+    <ProjectReference Include="..\CoreIdentityDemo.Domain\CoreIdentityDemo.Domain.csproj" />
   </ItemGroup>
 
 </Project>

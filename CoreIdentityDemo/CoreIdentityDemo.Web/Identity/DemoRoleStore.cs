@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CoreIdentityDemo.Domain.Entities;
+using CoreIdentityDemo.Domain.UnitOfWork;
+using CoreIdentityDemo.Web.Util;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Security.Claims;
-using CoreIdentityDemo.ApiClients;
-using CoreIdentityDemo.Common.Util;
-using CoreIdentityDemo.Common.IdentityApi;
+using System.Threading.Tasks;
 
 namespace CoreIdentityDemo.Web.Identity
 {
@@ -15,15 +14,15 @@ namespace CoreIdentityDemo.Web.Identity
         : IRoleStore<DemoIdentityRole>
         , IRoleClaimStore<DemoIdentityRole>
     {
-        private readonly IIdentityApiClient _identityApiClient;
+        private readonly IUnitOfWork _unitOfWork;
         private bool _disposed;
 
-        public DemoRoleStore(IIdentityApiClient identityApiClient)
+        public DemoRoleStore(IUnitOfWork unitOfWork)
         {
-            _identityApiClient = identityApiClient;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task AddClaimAsync(DemoIdentityRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task AddClaimAsync(DemoIdentityRole role, System.Security.Claims.Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -31,7 +30,16 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(claim, nameof(claim));
 
             var roleId = getGuid(role.Id);
-            await _identityApiClient.AddRoleClaimAsync(roleId, claim.Type, claim.Value);
+
+            var roleClaim = new RoleClaim
+            {
+                RoleId = roleId,
+                Type = claim.Type,
+                Value = claim.Value
+            };
+
+            await _unitOfWork.RoleClaimRepository.AddAsync(roleClaim);
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task<IdentityResult> CreateAsync(DemoIdentityRole role, CancellationToken cancellationToken)
@@ -40,8 +48,10 @@ namespace CoreIdentityDemo.Web.Identity
             throwIfDisposed();
             ExceptionUtil.ThrowIfNull(role, nameof(role));
 
-            var model = getRoleModel(role);
-            await _identityApiClient.CreateRoleAsync(model);
+            var roleEntity = getRoleEntity(role);
+
+            await _unitOfWork.RoleRepository.AddAsync(roleEntity);
+            await _unitOfWork.CommitAsync();
 
             return IdentityResult.Success;
         }
@@ -53,15 +63,21 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(role, nameof(role));
 
             var roleId = getGuid(role.Id);
-            await _identityApiClient.DeleteRoleAsync(roleId);
+
+            var roleEntity = await _unitOfWork.RoleRepository.GetByKeyAsync(roleId);
+            if(roleEntity != null)
+            {
+                await _unitOfWork.RoleRepository.DeleteAsync(roleEntity);
+                await _unitOfWork.CommitAsync();
+            }
 
             return IdentityResult.Success;
         }
 
         public void Dispose()
         {
-            if (_identityApiClient != null)
-                _identityApiClient.Dispose();
+            if (_unitOfWork != null)
+                _unitOfWork.Dispose();
             _disposed = true;
         }
 
@@ -71,8 +87,9 @@ namespace CoreIdentityDemo.Web.Identity
             throwIfDisposed();
 
             var roleGuid = getGuid(roleId);
-            var model = await _identityApiClient.FindRoleByIdAsync(roleGuid);
-            return getIdentityRole(model);
+            var roleEntity = await _unitOfWork.RoleRepository.GetByKeyAsync(roleGuid);
+
+            return getIdentityRole(roleEntity);
         }
 
         public async Task<DemoIdentityRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
@@ -80,20 +97,24 @@ namespace CoreIdentityDemo.Web.Identity
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
 
-            var model = await _identityApiClient.FindRoleByName(normalizedRoleName);
-            return getIdentityRole(model);
+            var roleEntity = await _unitOfWork.RoleRepository.GetByNormalizedNameAsync(normalizedRoleName);
+
+            return getIdentityRole(roleEntity);
         }
 
-        public async Task<IList<Claim>> GetClaimsAsync(DemoIdentityRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IList<System.Security.Claims.Claim>> GetClaimsAsync(DemoIdentityRole role, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
             ExceptionUtil.ThrowIfNull(role, nameof(role));
 
             var roleId = getGuid(role.Id);
-            return (await _identityApiClient.GetRoleClaimsAsync(roleId))
-                .Select(x => new Claim(x.Type, x.Value))
+
+            var result = (await _unitOfWork.RoleClaimRepository.GetByRoleIdAsync(roleId))
+                .Select(x => new System.Security.Claims.Claim(x.Type, x.Value))
                 .ToList();
+
+            return result;
         }
 
         public Task<string> GetNormalizedRoleNameAsync(DemoIdentityRole role, CancellationToken cancellationToken)
@@ -123,7 +144,7 @@ namespace CoreIdentityDemo.Web.Identity
             return Task.FromResult(role.Name);
         }
 
-        public async Task RemoveClaimAsync(DemoIdentityRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task RemoveClaimAsync(DemoIdentityRole role, System.Security.Claims.Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             throwIfDisposed();
@@ -131,7 +152,15 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(claim, nameof(claim));
 
             var roleId = getGuid(role.Id);
-            await _identityApiClient.RemoveRoleClaimAsync(roleId, claim.Type, claim.Value);
+
+            var roleClaim = (await _unitOfWork.RoleClaimRepository.GetByRoleIdAsync(roleId))
+                .SingleOrDefault(x => x.Type == claim.Type && x.Value == claim.Value);
+
+            if(roleClaim != null)
+            {
+                await _unitOfWork.RoleClaimRepository.DeleteAsync(roleClaim);
+                await _unitOfWork.CommitAsync();
+            }
         }
 
         public Task SetNormalizedRoleNameAsync(DemoIdentityRole role, string normalizedName, CancellationToken cancellationToken)
@@ -161,8 +190,10 @@ namespace CoreIdentityDemo.Web.Identity
             ExceptionUtil.ThrowIfNull(role, nameof(role));
 
             role.ConcurrencyStamp = Guid.NewGuid().ToString();
-            var model = getRoleModel(role);
-            await _identityApiClient.UpdateRole(model);
+            var roleEntity = getRoleEntity(role);
+
+            await _unitOfWork.RoleRepository.UpdateAsync(roleEntity);
+            await _unitOfWork.CommitAsync();
 
             return IdentityResult.Success;
         }
@@ -181,34 +212,34 @@ namespace CoreIdentityDemo.Web.Identity
             return result;
         }
 
-        private RoleModel getRoleModel(DemoIdentityRole role)
+        private Role getRoleEntity(DemoIdentityRole role)
         {
-            var model = new RoleModel();
-            populateRoleModel(model, role);
+            var model = new Role();
+            populateRoleEntity(model, role);
             return model;
         }
 
-        private void populateRoleModel(RoleModel model, DemoIdentityRole role)
+        private void populateRoleEntity(Role entity, DemoIdentityRole role)
         {
-            model.Id = getGuid(role.Id);
-            model.Name = role.Name;
-            model.NormalizedName = role.NormalizedName;
-            model.ConcurrencyStamp = role.ConcurrencyStamp;
+            entity.Id = getGuid(role.Id);
+            entity.Name = role.Name;
+            entity.NormalizedName = role.NormalizedName;
+            entity.ConcurrencyStamp = role.ConcurrencyStamp;
         }
 
-        private DemoIdentityRole getIdentityRole(RoleModel model)
+        private DemoIdentityRole getIdentityRole(Role roleEntity)
         {
             var role = new DemoIdentityRole();
-            populateIdentityRole(role, model);
+            populateIdentityRole(role, roleEntity);
             return role;
         }
 
-        private void populateIdentityRole(DemoIdentityRole role, RoleModel model)
+        private void populateIdentityRole(DemoIdentityRole role, Role roleEntity)
         {
-            role.Id = model.Id.ToString();
-            role.Name = model.Name;
-            role.NormalizedName = model.NormalizedName;
-            role.ConcurrencyStamp = model.ConcurrencyStamp;
+            role.Id = roleEntity.Id.ToString();
+            role.Name = roleEntity.Name;
+            role.NormalizedName = roleEntity.NormalizedName;
+            role.ConcurrencyStamp = roleEntity.ConcurrencyStamp;
         }
     }
 }

@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CoreIdentityDemo.Data.DapperSql.UnitOfWork;
+using CoreIdentityDemo.Domain.UnitOfWork;
+using CoreIdentityDemo.Web.Identity;
+using CoreIdentityDemo.Web.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using CoreIdentityDemo.Web.Models;
-using CoreIdentityDemo.Web.Services;
-using CoreIdentityDemo.ApiClients;
-using CoreIdentityDemo.Web.Identity;
-using Microsoft.AspNetCore.Identity;
 
 namespace CoreIdentityDemo.Web
 {
@@ -40,8 +34,8 @@ namespace CoreIdentityDemo.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var qq = Configuration.GetValue<string>("AppSettings:IdentityApiBaseUrl");
-            services.AddScoped<IIdentityApiClient, IdentityApiClient>(provider => new IdentityApiClient(qq));
+            var connectionString = Configuration.GetValue<string>("ConnectionStrings:CoreIdentityDemo");
+            services.AddScoped<IUnitOfWork, UnitOfWork>(x => new UnitOfWork(connectionString));
 
             services.AddIdentity<DemoIdentityUser, DemoIdentityRole>()
                 .AddCustomStores()
