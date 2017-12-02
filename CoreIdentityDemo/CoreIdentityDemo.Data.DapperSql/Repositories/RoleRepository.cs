@@ -166,7 +166,7 @@ namespace CoreIdentityDemo.Data.DapperSql.Repositories
                         r.[Normalizedname],
                         r.[ConcurrencyStamp]
                     FROM
-                        [UserRoles] INNER JOIN
+                        [UserRoles] ur INNER JOIN
                         [Roles] r ON ur.RoleId = r.Id
                     WHERE
                         ur.UserId = @UserId

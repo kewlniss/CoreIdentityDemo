@@ -671,7 +671,7 @@ namespace CoreIdentityDemo.Web.Identity
 
         private User getUser(DemoIdentityUser user)
         {
-            var result = default(User);
+            var result = new User();
             populateUser(result, user);
             return result;
         }
